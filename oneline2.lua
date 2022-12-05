@@ -1,20 +1,31 @@
 maxHealth = 10
 botsSmallestDist = 99999
+
 function oneline2whatTo(agent, actorKnowledge, time)
     friends = actorKnowledge:getSeenFriends()
     enemies = actorKnowledge:getSeenFoes()
     nav = actorKnowledge:getNavigation()
-
-    triggerToMove = -1
+    if (actorKnowledge:isMoving() == true) then
+        io.write("moving ")
+    end
     if (actorKnowledge:isMoving() == false) then
+        triggToMove = -1
+        triggToMoveDist = 99999
         for i = 0, nav:getNumberOfTriggers() - 1, 1 do
             trig = nav:getTrigger(i)
-            dist = trig:getPosition() - actorKnowledge:getPosition()
-            if (dist:length() < 150 and trig:isActive()) then
-                agent:moveTo(trig:getPosition())
+            tempDist = (trig:getPosition() - actorKnowledge:getPosition()):length()
+            if (tempDist< 200 and trig:isActive()) then
+                if (tempDist < triggToMoveDist) then
+                    triggToMoveDist = tempDist
+                    triggToMove = i
+                end
             end
         end
+        if (triggToMove ~= -1) then
+            agent:moveTo(nav:getTrigger(triggToMove):getPosition())
+        end
     end
+    -- ------get Health------
     if (actorKnowledge:getHealth() < maxHealth / 2) then
         triggToMove = -1
         triggToMoveDist = 99999
@@ -35,7 +46,7 @@ function oneline2whatTo(agent, actorKnowledge, time)
             agent:moveTo(nav:getTrigger(triggToMove):getPosition())
         end
     end
-
+    -- ------get Ammo------
     if (actorKnowledge:getAmmo(Enumerations.RocketLuncher) == 0 and actorKnowledge:getAmmo(Enumerations.Railgun) == 0 and
         actorKnowledge:getAmmo(Enumerations.Shotgun) == 0 and actorKnowledge:getAmmo(Enumerations.Chaingun) == 0) then
         triggToMove = -1
